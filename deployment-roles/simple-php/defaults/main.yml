@@ -1,0 +1,4 @@
+---
+default_app_base_path: '/var/www/applications'
+default_host_nginx_path: '/etc/nginx'
+default_deploy_config_base_path: '/var/deployment-configs'

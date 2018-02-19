@@ -1,0 +1,67 @@
+---
+- name: Simple PHP - Register vars
+  set_fact: "deploy_config_path={{ deploy_config_base_path }}/{{ app_name }}"
+- name: Simple PHP - Get a free port
+  shell: "/usr/local/bin/port_finder"
+  register:
+    port_finder_output
+- name: Simple PHP - Remember the free port
+  set_fact: app_port="{{ port_finder_output.stdout }}"
+- name: Simple PHP - Create deployment config directory
+  file:
+    path: "{{ deploy_config_path }}"
+    state: directory
+    owner: vagrant
+    group: vagrant
+- name: Simple PHP - Create docker nginx config
+  template:
+    src: templates/docker-nginx.conf.j2
+    dest: "{{ deploy_config_path }}/docker-nginx.conf"
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+  notify:
+    - restart nginx
+- name: Simple PHP - Create host nginx config
+  template:
+    src: templates/host-nginx.conf.j2
+    dest: "{{ host_nginx_path }}/sites-available/{{ app_name }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+- name: Simple PHP - Create host nginx config link
+  file:
+    path: "{{ host_nginx_path }}/sites-enabled/{{ app_name }}.conf"
+    src: "{{ host_nginx_path }}/sites-available/{{ app_name }}.conf"
+    state: link
+    owner: root
+    group: root
+    mode: '0644'
+- name: Simple PHP - Debug
+  debug:
+    msg: "The app is in {{ app_path }} port is {{ app_port }}"
+- name: Simple PHP - Compose the Docker container
+  docker_service:
+    project_name: "simple_php_{{ app_name }}"
+    definition:
+      version: '3.3'
+      services:
+        web:
+          container_name: "{{ app_name }}_main"
+          image: "nginx:latest"
+          volumes:
+            - "{{ deploy_config_path }}/docker-nginx.conf:/etc/nginx/conf.d/application.conf"
+            - "{{ app_path }}:/application"
+          ports:
+            - "{{ app_port }}:8010"
+        php:
+          image: "php:7-fpm"
+          volumes:
+            - "{{ app_path }}:/application"
+      networks:
+       default:
+        attachable: true
+- name: Simple PHP - Restart nginx
+  service:
+    name: nginx
+    state: restarted

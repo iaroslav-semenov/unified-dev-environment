@@ -1,0 +1,19 @@
+version: '3.3'
+services:
+ web:
+  container_name: {{ app_name }}_main
+  image: nginx:latest
+  ports:
+   - "{{ app_port }}:8010"
+  volumes:
+   - ./{{ app_nginx_config }}.conf:/etc/nginx/conf.d/application.conf
+   - {{ app_path }}:/application
+  expose:
+   - 8010
+ php:
+  image: php:7-fpm
+  volumes:
+   - {{ app_path }}:/application
+networks:
+ default:
+  attachable: true

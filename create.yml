@@ -1,0 +1,25 @@
+---
+- hosts: default
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  vars:
+      apps_directory: "/var/www/"
+      deploy_template: "{{ deploy_template }}"
+      app_name: "{{ app_name }}"
+      role_exists: "{{ role_exists }}"
+  pre_tasks:
+    - name: Create App - Ensure the directory exists
+      file:
+        path: "{{apps_directory}}/{{ app_name }}"
+        state: directory
+        mode: 755
+        owner: www-data
+        group: www-data
+    - name: Create App - Fail if the role absent
+      fail:
+        msg: "Deployment role {{ deploy_template }} does not exist"
+      when: role_exists != "yes"
+  roles:
+    - role: "deployment-roles/{{ deploy_template }}"
+      app_name: "{{ app_name }}"

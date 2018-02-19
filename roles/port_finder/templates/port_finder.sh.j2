@@ -1,0 +1,14 @@
+#!/bin/bash
+port_from={{port_from}}
+port_to={{port_to}}
+
+
+for (( port = port_from ; port <= port_to ; port++ )); do
+    scan_result=$(nc -zvw 2 127.0.0.1 $port 2>&1)
+    if [[ "$scan_result" == *refused ]]; then
+        echo $port;
+        break 1;
+    fi
+done
+
+#echo $port

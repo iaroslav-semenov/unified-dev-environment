@@ -1,0 +1,9 @@
+---
+- name: Common - ensure libraries are up to date
+  apt:
+    name: '{{ item }}'
+    state: latest
+    update_cache: yes
+  with_items:
+    - libpq-dev
+    - python3-pip

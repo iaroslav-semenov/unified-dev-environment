@@ -1,0 +1,8 @@
+---
+- name: Port Finder - ensure port_finder script exists
+  template:
+    src: templates/port_finder.sh.j2
+    dest: /usr/local/bin/port_finder
+    owner: root
+    group: root
+    mode: "u=rwx,g=rx,o=rx"
