@@ -1,0 +1,108 @@
+---
+- name: PHP application - Register vars
+  set_fact:
+    deploy_config_path: "{{ deploy_config_base_path }}/{{ app_name }}"
+    php_image_name: "php-fpm-{{ app_name }}"
+- name: PHP application - Get a free port
+  shell: "/usr/local/bin/port_finder"
+  register:
+    port_finder_output
+- name: PHP application - Remember the free port
+  set_fact: app_port="{{ port_finder_output.stdout }}"
+- name: PHP application - Create deployment config directory
+  file:
+    path: "{{ deploy_config_path }}"
+    state: directory
+    owner: vagrant
+    group: vagrant
+- name: PHP application - Create docker nginx config
+  template:
+    src: templates/docker-nginx.conf.j2
+    dest: "{{ deploy_config_path }}/docker-nginx.conf"
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+  notify:
+    - restart nginx
+- name: PHP application - Create host nginx config
+  template:
+    src: templates/host-nginx.conf.j2
+    dest: "{{ host_nginx_path }}/sites-available/{{ app_name }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+- name: PHP application - Create host nginx config link
+  file:
+    path: "{{ host_nginx_path }}/sites-enabled/{{ app_name }}.conf"
+    src: "{{ host_nginx_path }}/sites-available/{{ app_name }}.conf"
+    state: link
+    owner: root
+    group: root
+    mode: '0644'
+- name: PHP application - Make a Dockerfile for the PHP container
+  template:
+    src: templates/Dockerfile.j2
+    dest: "{{ deploy_config_path }}/Dockerfile"
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+- name: PHP application - Copy The entrypoint for the docker image
+  copy:
+    src: files/entrypoint.sh
+    dest: "{{ deploy_config_path }}/entrypoint.sh"
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+- name: PHP application - Copy PHP-fpm www.conf for the docker image
+  copy:
+    src: files/www.conf
+    dest: "{{ deploy_config_path }}/www.conf"
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+- name: PHP application - Make php.ini for the container
+  copy:
+    src: templates/php.ini.j2
+    dest: "{{ deploy_config_path }}/php.ini"
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
+- name: PHP application - Remove previous version of the image
+  docker_image:
+    name: "{{ php_image_name }}"
+    state: absent
+    force: yes
+- name: PHP application - Build a custom PHP image with the needed extensions
+  docker_image:
+    path: "{{ deploy_config_path }}"
+    name: "{{ php_image_name }}"
+- name: PHP application - Debug
+  debug:
+    msg: "The app is in {{ app_path }} port is {{ app_port }}."
+- name: PHP application - Compose the Docker container
+  docker_service:
+    project_name: "simple_php_{{ app_name }}"
+    nocache: yes
+    definition:
+      version: '3.3'
+      services:
+        web:
+          container_name: "{{ app_name }}_main"
+          image: "nginx:latest"
+          volumes:
+            - "{{ deploy_config_path }}/docker-nginx.conf:/etc/nginx/conf.d/application.conf"
+            - "{{ app_path }}:/application"
+          ports:
+            - "{{ app_port }}:8010"
+        php:
+          container_name: "{{ app_name }}_php"
+          image: "{{ php_image_name }}:latest"
+          volumes:
+            - "{{ app_path }}:/application"
+      networks:
+       default:
+        attachable: true
+- name: PHP application - Restart nginx
+  service:
+    name: nginx
+    state: restarted

@@ -1,0 +1,6 @@
+---
+- name: PostgreSQL - Ensure PosgreSQL is installed
+  apt: name={{ item }} state=present  update_cache=yes
+  with_items:
+    - postgresql
+    - postgresql-contrib

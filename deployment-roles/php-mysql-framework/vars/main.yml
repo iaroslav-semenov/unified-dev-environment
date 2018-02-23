@@ -1,0 +1,15 @@
+---
+app_name: ''
+app_port: ''
+public_directory: 'public'
+deploy_config_path: ''
+needed_php_version: '7.0'
+needed_extensions: [
+  'curl',
+  'pdo',
+  'xdebug',
+  'xml',
+  'common',
+  'gd',
+  'iconv'
+  ]

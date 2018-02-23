@@ -1,0 +1,45 @@
+FROM alpine:3.7
+
+ADD https://php.codecasts.rocks/php-alpine.rsa.pub /etc/apk/keys/php-alpine.rsa.pub
+RUN apk --update add ca-certificates
+RUN echo "@php https://php.codecasts.rocks/v3.7/php-{{ php_version }}" >> /etc/apk/repositories
+
+RUN apk --no-cache add curl git zip
+
+RUN apk add --update \
+        php{{ php_version.split('.')[0] }} \
+        {% for extensionName in php_extensions %}
+          php{{ php_version.split('.')[0] }}-{{ extensionName }} \
+        {% endfor %}
+        php{{ php_version.split('.')[0] }}-mbstring \
+        php{{ php_version.split('.')[0] }}-openssl \
+        php{{ php_version.split('.')[0] }}-phar \
+        php{{ php_version.split('.')[0] }}-json \
+        php{{ php_version.split('.')[0] }}-fpm \
+        php{{ php_version.split('.')[0] }}-cli
+
+RUN rm /etc/php{{ php_version.split('.')[0] }}/php-fpm.d/www.conf \
+    && rm /etc/php{{ php_version.split('.')[0] }}/php.ini
+COPY ./www.conf /etc/php{{ php_version.split('.')[0] }}/php-fpm.d/
+COPY ./php.ini /etc/php{{ php_version.split('.')[0] }}/php.ini
+
+{% if install_composer == 'yes' %}
+   RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+{% endif %}
+
+RUN set -x \
+    && addgroup -g 82 -S www-data \
+    && adduser -u 82 -D -S -G www-data www-data
+
+
+COPY ./entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+WORKDIR /application
+VOLUME ["/application"]
+
+EXPOSE 9000
+
+CMD ["/usr/sbin/php-fpm7", "-F"]

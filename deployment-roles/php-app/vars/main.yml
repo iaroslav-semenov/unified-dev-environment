@@ -1,7 +1,12 @@
 ---
 app_name: ''
 app_path: '{{ default_app_base_path }}/{{ app_name }}'
+app_public: ''
 app_port: ''
 host_nginx_path: '{{ default_host_nginx_path }}'
 deploy_config_base_path: '{{ default_deploy_config_base_path }}'
 deploy_config_path: ''
+public_path: '{{ default_public_path }}'
+php_version: '7'
+php_extensions: []
+install_composer: 'no'

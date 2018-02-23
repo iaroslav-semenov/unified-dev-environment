@@ -1,0 +1,4 @@
+---
+- name: Symfony 4 - Doing symfony things
+  debug:
+    msg: "Doing symfony things {{ needed_extensions }}"
