@@ -1,4 +1,8 @@
 # Unified Development Environment
+Requirements
+- Vagrant
+- Ansible 2.4+
+- Python 2.7+
 
 To get started run:
 
