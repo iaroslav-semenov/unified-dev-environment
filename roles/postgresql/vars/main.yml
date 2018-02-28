@@ -1,0 +1,2 @@
+---
+root_password: "{{ default_root_password }}"

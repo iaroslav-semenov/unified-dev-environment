@@ -14,6 +14,6 @@ Vagrant.configure("2") do |config|
   # Provisioning
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "environment.yml"
-    ansible.raw_arguments = ["-e ansible_python_interpreter=/usr/bin/python3"]
+    ansible.extra_vars = { ansible_python_interpreter: "/usr/bin/python3" }
   end
 end

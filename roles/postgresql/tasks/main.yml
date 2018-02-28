@@ -4,3 +4,13 @@
   with_items:
     - postgresql
     - postgresql-contrib
+- name: PostgreSQL - Ensure PostgreSQL is started and enabled on boot.
+  service:
+    name: postgresql
+    state: started
+- name: PostgreSQL - Change root password
+  postgresql_user:
+    name: root
+    password: "{{ root_password }}"
+  become: yes
+  become_user: postgres

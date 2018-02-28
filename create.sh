@@ -44,3 +44,4 @@ ansible-playbook \
         deploy_template=$deploy_template \
         app_name=$app_name \
         role_exists=$role_exists"
+

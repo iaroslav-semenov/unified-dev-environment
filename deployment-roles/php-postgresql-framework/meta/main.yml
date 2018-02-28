@@ -2,7 +2,7 @@
 dependencies:
   - role: "deployment-roles/php-app"
     app_name: "{{app_name}}"
-    app_public: "web"
+    app_public: "{{ public_directory }}"
     php_extensions: "{{ needed_extensions }}"
     php_version: "{{ needed_php_version }}"
     install_composer: "yes"

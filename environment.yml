@@ -5,10 +5,14 @@
   become_method: sudo
   vars:
     http_port: 80
+    db_root_password: toor_bd
   roles:
     - common
     - nginx
     - docker
     - port_finder
-    - mysql
+    - role: mysql
+      mysql_root_password: "{{ db_root_password }}"
+    - role: postgresql
+      root_password: "{{ db_root_password }}"
     - redis
