@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "private_network", ip: "192.168.50.10"
 
   # Files
-  config.vm.synced_folder "./../applications", "/var/www/applications", create: true, owner: "vagrant", group: "vagrant", mount_options: ["dmode=775", "fmode=774"]
+  config.vm.synced_folder "./../applications", "/var/www/applications", create: true, nfs: true, mount_options: ['nolock,vers=3,tcp,noatime']
 
   # Provisioning
   config.vm.provision "ansible" do |ansible|
