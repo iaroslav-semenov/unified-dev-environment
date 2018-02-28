@@ -20,9 +20,11 @@ RUN apk add --update \
         php{{ php_version.split('.')[0] }}-cli
 
 RUN rm /etc/php{{ php_version.split('.')[0] }}/php-fpm.d/www.conf \
-    && rm /etc/php{{ php_version.split('.')[0] }}/php.ini
+    && rm /etc/php{{ php_version.split('.')[0] }}/php.ini \
+    && rm /etc/php{{ php_version.split('.')[0] }}/conf.d/xdebug.ini
 COPY ./www.conf /etc/php{{ php_version.split('.')[0] }}/php-fpm.d/
 COPY ./php.ini /etc/php{{ php_version.split('.')[0] }}/php.ini
+COPY ./xdebug.ini /etc/php{{ php_version.split('.')[0] }}/conf.d/20-xdebug.ini
 
 {% if install_composer == 'yes' %}
    RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer

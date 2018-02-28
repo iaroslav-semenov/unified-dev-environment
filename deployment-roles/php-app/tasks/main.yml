@@ -67,6 +67,13 @@
     owner: vagrant
     group: vagrant
     mode: '0644'
+- name: PHP application - Make xdebug.ini for the container
+  copy:
+    src: templates/xdebug.ini.j2
+    dest: "{{ deploy_config_path }}/xdebug.ini"
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
 - name: PHP application - Remove previous version of the image
   docker_image:
     name: "{{ php_image_name }}"
